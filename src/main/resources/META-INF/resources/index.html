@@ -32,7 +32,8 @@
 
         $scope.form = {
           id: -1,
-          name: ""
+          name: "",
+          udf: "empty"
         };
 
         //Now load the data from server
@@ -65,6 +66,15 @@
           }).then(_success, _error);
         };
 
+        //HTTP POST/PUT methods to register a JS UDF
+        $scope.updateUDF = function () {
+          $http({
+            method: "POST",
+            url: "/fruits/register",
+            data: $scope.form.code,
+          }).then(_success, _error);
+        };
+
         //HTTP DELETE- delete fruit by id
         $scope.remove = function (fruit) {
           $http({
@@ -77,6 +87,19 @@
         $scope.edit = function (fruit) {
           $scope.form.name = fruit.name;
           $scope.form.id = fruit.id;
+        };
+
+        $scope.udf = function (fruit) {
+          $scope.form.id = fruit.id;
+          $http({
+            method: 'GET',
+            url: '/fruits/udf/' + fruit.id
+          }).then(function successCallback(response) {
+            console.log("la risposta e': " + response.data);
+            $scope.form.udf = response.data;
+          }, function errorCallback(response) {
+            console.log(response.statusText);
+          });
         };
 
           /* Private Methods */
@@ -116,18 +139,6 @@
     <p>This application demonstrates how a Quarkus application implements a CRUD endpoint to manage fruits.
         This management interface invokes the CRUD service endpoint, which interacts with a database using JPA and several other well known libraries.
     </p>
-    <p>Behind the scenes, we have:
-        <ul>
-            <li>Hibernate ORM taking care of all CRUD operations</li>
-            <li>RESTEasy powering the REST API</li>
-            <li>ArC, a CDI based dependency injection framework</li>
-            <li>the Narayana Transaction Manager coordinating all transactions</li>
-            <li>Agroal, the high performance Datasource implementation</li>
-            <li>Infinispan used as Hibernate 2nd level caching: enabled on both entities and queries</li>
-            <li>The Undertow webserver</li>
-            <li>Some magic bytecode generation plugged in the compiler...</li>
-        </ul>
-    </p>
 
     <h3>Add/Edit a fruit</h3>
     <form ng-submit="update()">
@@ -137,13 +148,30 @@
         <input type="submit" value="Save"/>
     </form>
 
+    <h5>Custom function</h5>
+    <form ng-submit="updateUDF()">
+      <div class="row">
+          <div class="col-6"><input type="text" placeholder="replaceme - js code" ng-model="form.code" size="60"/></div>
+      </div>
+      <input type="submit" value="Save"/>
+    </form>
+
+    <h5>Result</h5>
+      <div class="row">
+        <div class="col-2">{{ form.udf }}</div>
+      </div>
+    </form>
+
     <h3>Fruit List</h3>
     <div class="row">
         <div class="col-2">Name</div>
     </div>
     <div class="row" ng-repeat="fruit in fruits">
         <div class="col-2">{{ fruit.name }}</div>
-        <div class="col-8"><a ng-click="edit( fruit )" class="btn">Edit</a> <a ng-click="remove( fruit )" class="btn">Remove</a>
+        <div class="col-8">
+          <a ng-click="edit( fruit )" class="btn">Edit</a>
+          <a ng-click="remove( fruit )" class="btn">Remove</a>
+          <a ng-click="udf( fruit )" class="btn">UDF</a>
         </div>
     </div>
 </div>
