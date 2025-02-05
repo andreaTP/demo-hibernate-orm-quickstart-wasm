@@ -103,6 +103,23 @@
                     </execution>
                 </executions>
             </plugin>
+            <plugin>
+                <groupId>com.dylibso.chicory</groupId>
+                <artifactId>aot-maven-plugin-experimental</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                    <execution>
+                        <id>compile-quickjs</id>
+                        <goals>
+                            <goal>wasm-aot-gen</goal>
+                        </goals>
+                        <configuration>
+                        <name>org.acme.hibernate.orm.QuickJS</name>
+                        <wasmFile>${project.basedir}/quickjs/quickjs-provider.javy-dynamic.wasm</wasmFile>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

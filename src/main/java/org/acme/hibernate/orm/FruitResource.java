@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import io.agroal.api.AgroalDataSource;
 import io.roastedroot.sqlite4j.Function;
 import io.roastedroot.sqlite4j.SQLiteConnection;
@@ -56,6 +58,7 @@ public class FruitResource {
     @Path("register")
     public Response registerUdf(String jsCode) throws SQLException {
         LOGGER.info("registered UDF: " + jsCode);
+        jsService.installFunction(jsCode);
 
         JdbcConnectionAccess access = entityManager
                 .unwrap(SessionImpl.class)
@@ -66,9 +69,7 @@ public class FruitResource {
                 @Override
                 public void xFunc() throws SQLException {
                     String fruitName = value_text(0);
-
-                    LOGGER.info("UDF called on name: " + fruitName);
-
+                    LOGGER.info("UDF calling with name: " + fruitName);
                     result(jsService.compute(fruitName));
                 }
             });
@@ -78,11 +79,11 @@ public class FruitResource {
 
     @GET
     @Path("udf/{id}")
-    public int udfInvoke(Integer id) throws SQLException {
-        var result = (int) entityManager
+    public JsonNode udfInvoke(Integer id) throws SQLException {
+        var result = (String) entityManager
                 .createNativeQuery("select " + UDFNAME + "(f.name) from known_fruits f where f.id = " + id)
                 .getSingleResult();
-        return result;
+        return TextNode.valueOf(result);
     }
 
 
