@@ -102,6 +102,6 @@ Have fun, and join the team of contributors!
 
 <p align="center">
   <picture>
-    <img width="80%" src="imgs/what.png">
+    <img width="50%" src="imgs/what.png">
   </picture>
 </p>
