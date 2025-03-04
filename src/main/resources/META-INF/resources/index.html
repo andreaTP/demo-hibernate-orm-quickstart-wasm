@@ -66,15 +66,6 @@
           }).then(_success, _error);
         };
 
-        //HTTP POST/PUT methods to register a JS UDF
-        $scope.updateUDF = function () {
-          $http({
-            method: "POST",
-            url: "/fruits/register",
-            data: $scope.form.code,
-          }).then(_success, _error);
-        };
-
         //HTTP DELETE- delete fruit by id
         $scope.remove = function (fruit) {
           $http({
@@ -87,19 +78,6 @@
         $scope.edit = function (fruit) {
           $scope.form.name = fruit.name;
           $scope.form.id = fruit.id;
-        };
-
-        $scope.udf = function (fruit) {
-          $scope.form.id = fruit.id;
-          $http({
-            method: 'GET',
-            url: '/fruits/udf/' + fruit.id
-          }).then(function successCallback(response) {
-            console.log("la risposta e': " + response.data);
-            $scope.form.udf = response.data;
-          }, function errorCallback(response) {
-            console.log(response.statusText);
-          });
         };
 
           /* Private Methods */
@@ -160,20 +138,6 @@
           <a ng-click="udf( fruit )" class="btn">UDF</a>
         </div>
     </div>
-
-    <h5>Custom function</h5>
-    <form ng-submit="updateUDF()">
-      <div class="row">
-          <div class="col-6"><input type="text" placeholder="e.g.: 'hello ' + name + ': ' + name.length" ng-model="form.code" size="60"/></div>
-      </div>
-      <input type="submit" value="Save"/>
-    </form>
-
-    <h5>Result</h5>
-      <div class="row">
-        <div class="col-2">{{ form.udf }}</div>
-      </div>
-    </form>
 
 </div>
 

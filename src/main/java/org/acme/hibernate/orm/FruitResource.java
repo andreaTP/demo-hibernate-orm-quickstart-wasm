@@ -1,5 +1,9 @@
 package org.acme.hibernate.orm;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -26,6 +30,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.hibernate.engine.jdbc.connections.spi.JdbcConnectionAccess;
 import org.hibernate.internal.SessionImpl;
 import org.jboss.logging.Logger;
@@ -40,52 +45,15 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class FruitResource {
 
     private static final Logger LOGGER = Logger.getLogger(FruitResource.class.getName());
-    private static final String UDFNAME = "myudf";
 
     @Inject
     EntityManager entityManager;
-
-    @Inject
-    JavascriptService jsService;
 
     @GET
     public List<Fruit> get() {
         return entityManager.createNamedQuery("Fruits.findAll", Fruit.class)
                 .getResultList();
     }
-
-    @POST
-    @Path("register")
-    public Response registerUdf(String jsCode) throws SQLException {
-        LOGGER.info("registered UDF: " + jsCode);
-        jsService.installFunction(jsCode);
-
-        JdbcConnectionAccess access = entityManager
-                .unwrap(SessionImpl.class)
-                .getJdbcConnectionAccess();
-        try (var conn = access.obtainConnection()) {
-            SQLiteConnection sqliteConn = conn.unwrap(SQLiteConnection.class);
-            Function.create(sqliteConn, UDFNAME, new Function() {
-                @Override
-                public void xFunc() throws SQLException {
-                    String fruitName = value_text(0);
-                    LOGGER.info("UDF calling with name: " + fruitName);
-                    result(jsService.compute(fruitName));
-                }
-            });
-        }
-        return Response.ok().status(200).build();
-    }
-
-    @GET
-    @Path("udf/{id}")
-    public JsonNode udfInvoke(Integer id) throws SQLException {
-        var result = (String) entityManager
-                .createNativeQuery("select " + UDFNAME + "(f.name) from known_fruits f where f.id = " + id)
-                .getSingleResult();
-        return TextNode.valueOf(result);
-    }
-
 
     @GET
     @Path("{id}")
