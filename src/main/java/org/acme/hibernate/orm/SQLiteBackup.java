@@ -1,14 +1,12 @@
 package org.acme.hibernate.orm;
 
+import io.agroal.api.AgroalDataSource;
 import io.quarkus.runtime.ShutdownEvent;
 import io.quarkus.scheduler.Scheduled;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.hibernate.engine.jdbc.connections.spi.JdbcConnectionAccess;
-import org.hibernate.internal.SessionImpl;
 import org.jboss.logging.Logger;
 
 import java.io.IOException;
@@ -22,18 +20,18 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @ApplicationScoped
 public class SQLiteBackup {
 
+    private static final Logger LOGGER = Logger.getLogger(SQLiteBackup.class.getName());
+
     @ConfigProperty(name = "quarkus.datasource.jdbc.url")
     String jdbcUrl;
 
-    private static final Logger LOGGER = Logger.getLogger(SQLiteBackup.class.getName());
-
     @Inject
-    EntityManager entityManager;
+    AgroalDataSource dataSource;
 
     private final AtomicBoolean executing = new AtomicBoolean(false);
 
     // Execute a backup every 10 seconds
-    @Scheduled(delay=10, delayUnit=TimeUnit.SECONDS, every="10s")
+    @Scheduled(delay=1, delayUnit=TimeUnit.SECONDS, every="10s")
     void scheduled() {
         backup();
     }
@@ -55,10 +53,7 @@ public class SQLiteBackup {
                 LOGGER.info("Starting DB backup for file: " + dbFile);
                 var backupDbFilePath = originalDbFilePath.toAbsolutePath().getParent().resolve(originalDbFilePath.getFileName() + "_backup");
 
-                JdbcConnectionAccess access = entityManager
-                        .unwrap(SessionImpl.class)
-                        .getJdbcConnectionAccess();
-                try (var conn = access.obtainConnection();
+                try (var conn = dataSource.getConnection();
                      var stmt = conn.createStatement()) {
                     // Execute the backup
                     stmt.executeUpdate("backup to " + backupDbFilePath);
