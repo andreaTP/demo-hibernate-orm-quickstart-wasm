@@ -48,9 +48,13 @@
             <artifactId>quarkus-rest-jackson</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-scheduler</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.quarkiverse.jdbc</groupId>
-            <artifactId>quarkus-sqlite4j</artifactId>
-            <version>0.0.1</version>
+            <artifactId>quarkus-jdbc-sqlite4j</artifactId>
+            <version>0.0.5</version>
         </dependency>
 
         <!-- Testing: -->

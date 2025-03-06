@@ -17,7 +17,6 @@ import jakarta.persistence.Table;
 public class Fruit {
 
     @Id
-    @SequenceGenerator(name = "fruitsSequence", sequenceName = "known_fruits_id_seq", allocationSize = 1, initialValue = 10)
     @GeneratedValue(generator = "fruitsSequence")
     private Integer id;
 
